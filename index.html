@@ -3,142 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comic Shop | Dynamic Nav</title>
+    <title>Comic Shop | Dynamic Reorder</title>
     <style>
         :root {
             --primary: #121212;
             --accent: #00d2ff;
             --bg: #fdfdfd;
+            --transition-speed: 0.4s;
         }
 
         body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); overflow-x: hidden; }
 
-        /* --- Banner & Characters --- */
-        header { background: #fff; padding: 20px 0; text-align: center; }
+        /* --- Character Banner (The Core Logic) --- */
+        header { background: #fff; padding: 40px 0 20px; text-align: center; overflow: hidden; }
         
         .character-banner {
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            gap: 10px;
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
-            padding: 0 10px;
+            perspective: 1000px; /* For the rotation effect */
         }
 
         .char-container {
-            flex: 1;
+            flex: 0 0 40%; /* Each takes 40% width */
             cursor: pointer;
-            text-align: center;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            transition: all var(--transition-speed) ease-in-out;
+            z-index: 1;
+            margin: 0 -5%; /* Initial slight overlap */
+        }
+
+        /* The Overlap Logic: Active character is on top and pushed to the middle */
+        .char-container.active {
+            z-index: 10;
+            flex: 0 0 45%;
+            margin: 0 -15%; /* Creates the 30-40% overlap on neighbors */
+            transform: scale(1.1);
         }
 
         .char-img {
             width: 100%;
             height: auto;
-            max-height: 200px; /* Limits size on large screens */
-            object-fit: contain;
-            filter: grayscale(80%) brightness(0.9);
-            transition: inherit;
+            display: block;
+            transition: opacity 0.2s ease, transform var(--transition-speed) ease;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
         }
 
-        .char-container.active .char-img {
-            filter: grayscale(0%) brightness(1);
-            transform: scale(1.15);
+        /* Subtle rotation/blend effect during switch */
+        .char-container.switching .char-img {
+            opacity: 0.5;
+            transform: rotateY(15deg) scale(0.95);
         }
 
         .char-label { 
             display: block; 
-            margin-top: 10px; 
-            font-size: 0.75rem; 
-            font-weight: 800; 
-            letter-spacing: 1px;
+            margin-top: 15px; 
+            font-size: 0.7rem; 
+            font-weight: 900; 
             text-transform: uppercase;
-            color: #999;
+            color: #ccc;
+            letter-spacing: 2px;
         }
-
-        .char-container.active .char-label { color: var(--primary); }
+        .active .char-label { color: var(--primary); }
 
         /* --- Tabs --- */
-        .tabs {
-            display: flex;
-            justify-content: center;
-            background: var(--primary);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 18px 5px;
-            border: none;
-            background: none;
-            color: #666;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.8rem;
-            transition: 0.3s;
-        }
-
+        .tabs { display: flex; justify-content: center; background: var(--primary); position: sticky; top: 0; z-index: 1000; }
+        .tab-btn { flex: 1; padding: 18px 5px; border: none; background: none; color: #555; cursor: pointer; font-weight: 700; transition: 0.3s; }
         .tab-btn.active { color: #fff; box-shadow: inset 0 -4px 0 var(--accent); }
 
-        /* --- Content & Grid --- */
-        main { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        /* --- Content --- */
+        main { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; margin-bottom: 50px; }
+        .card { background: white; border: 1px solid #eee; padding: 15px; text-align: center; border-radius: 8px; }
+        .placeholder { height: 150px; background: #f9f9f9; margin-bottom: 10px; border-radius: 4px; }
         
-        h2.section-head { 
-            font-size: 1.8rem; 
-            margin-bottom: 25px; 
-            text-transform: uppercase; 
-            font-style: italic;
-        }
+        .cross-sell { opacity: 0.7; border-top: 1px solid #eee; padding-top: 30px; }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 25px;
-            margin-bottom: 60px;
-        }
-
-        .card { 
-            background: white; 
-            border: 2px solid #eee; 
-            padding: 15px; 
-            border-radius: 4px;
-            transition: 0.3s;
-        }
-        .card:hover { border-color: var(--accent); box-shadow: 8px 8px 0 rgba(0,0,0,0.05); }
-
-        .placeholder-img { height: 200px; background: #f0f0f0; margin-bottom: 15px; border-radius: 2px; }
-
-        .cross-sell { 
-            border-top: 2px dashed #ccc; 
-            padding-top: 40px; 
-            margin-top: 40px; 
-        }
-
-        /* Mobile Optimization */
         @media (max-width: 600px) {
-            .char-img { max-height: 120px; }
-            .grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-            .tab-btn { font-size: 0.65rem; }
-            h2.section-head { font-size: 1.3rem; }
+            .char-container { flex: 0 0 50%; }
+            .char-container.active { flex: 0 0 60%; margin: 0 -20%; }
+            .grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="character-banner">
-        <div class="char-container" onclick="switchTab(0)" id="char-0">
+    <div class="character-banner" id="banner">
+        <div class="char-container" onclick="switchTab(0)" id="char-0" style="order: 1;">
             <img src="characters/kha_straight.png" class="char-img" id="img-0">
             <span class="char-label">Outfits</span>
         </div>
-        <div class="char-container" onclick="switchTab(1)" id="char-1">
+        <div class="char-container" onclick="switchTab(1)" id="char-1" style="order: 2;">
             <img src="characters/saf_straight.png" class="char-img" id="img-1">
             <span class="char-label">Accessories</span>
         </div>
-        <div class="char-container" onclick="switchTab(2)" id="char-2">
+        <div class="char-container" onclick="switchTab(2)" id="char-2" style="order: 3;">
             <img src="characters/dav_straight.png" class="char-img" id="img-2">
             <span class="char-label">Silver</span>
         </div>
@@ -151,78 +113,78 @@
     </nav>
 </header>
 
-<main id="view-port">
-    </main>
+<main id="view-port"></main>
 
 <script>
     const categories = [
-        { name: "Outfits", prefix: "kha", items: ["Hero Jacket", "Stealth Suit", "Cosmic Cape"] },
-        { name: "Accessories", prefix: "saf", items: ["Utility Pouch", "Pulse Gauntlets", "Goggles"] },
-        { name: "Silver", prefix: "dav", items: ["Pendant of Might", "Orbit Ring", "Titan Chain"] }
+        { name: "Outfits", prefix: "kha", items: ["Cyber Jacket", "Street Kimono", "Neon Tech Pants"] },
+        { name: "Accessories", prefix: "saf", items: ["Glass Visor", "Tactical Scarf", "Data Watch"] },
+        { name: "Silver", prefix: "dav", items: ["Link Chain", "Engraved Band", "Blade Pendant"] }
     ];
 
-    function switchTab(idx) {
-        // 1. Update Character Visuals
-        categories.forEach((cat, i) => {
-            const imgEl = document.getElementById(`img-${i}`);
-            const charCont = document.getElementById(`char-${i}`);
-            const btnEl = document.getElementById(`btn-${i}`);
-            
-            // Remove active classes
-            charCont.classList.remove('active');
-            btnEl.classList.remove('active');
+    function switchTab(activeIndex) {
+        const containers = [0, 1, 2];
 
-            // Set Image Source based on position relative to active tab
-            let posture = "";
-            if (i === idx) {
-                posture = "straight";
-                charCont.classList.add('active');
-                btnEl.classList.add('active');
-            } else if (i < idx) {
-                posture = "left"; // Character is to the left of the active shop
+        containers.forEach(i => {
+            const container = document.getElementById(`char-${i}`);
+            const img = document.getElementById(`img-${i}`);
+            const btn = document.getElementById(`btn-${i}`);
+            
+            // Trigger blend/rotation animation
+            container.classList.add('switching');
+            
+            // Set visual position (order)
+            // Logic: active is always order 2. 
+            // If active is 0: [1(order1), 0(order2), 2(order3)]
+            // If active is 1: [0(order1), 1(order2), 2(order3)]
+            // If active is 2: [0(order1), 2(order2), 1(order3)]
+            if (i === activeIndex) {
+                container.style.order = 2;
+                container.classList.add('active');
+                btn.classList.add('active');
+                img.src = `characters/${categories[i].prefix}_straight.png`;
             } else {
-                posture = "right"; // Character is to the right of the active shop
+                container.classList.remove('active');
+                btn.classList.remove('active');
+                
+                // Determine if this char should be on the left or right of center
+                if ((activeIndex === 0 && i === 1) || (activeIndex === 1 && i === 0) || (activeIndex === 2 && i === 0)) {
+                    container.style.order = 1;
+                    img.src = `characters/${categories[i].prefix}_left.png`;
+                } else {
+                    container.style.order = 3;
+                    img.src = `characters/${categories[i].prefix}_right.png`;
+                }
             }
-            
-            imgEl.src = `characters/${cat.prefix}_${posture}.png`;
+
+            // Remove animation class after transition finishes
+            setTimeout(() => {
+                container.classList.remove('switching');
+            }, 300);
         });
 
-        // 2. Render Shop Content
-        renderContent(idx);
+        renderStore(activeIndex);
     }
 
-    function renderContent(activeIndex) {
+    function renderStore(idx) {
         const port = document.getElementById('view-port');
-        const mainCat = categories[activeIndex];
+        const main = categories[idx];
         
-        let html = `<h2 class="section-head">${mainCat.name} Collection</h2>`;
-        html += `<div class="grid">${renderItems(mainCat.items)}</div>`;
-
-        // Cross-selling logic
-        html += `<div class="cross-sell">`;
+        let html = `<h2>${main.name}</h2><div class="grid">`;
+        html += main.items.map(item => `<div class="card"><div class="placeholder"></div><b>${item}</b><br><small>$50</small></div>`).join('');
+        html += `</div><div class="cross-sell"><h3>Complete your look</h3><div class="grid">`;
+        
         categories.forEach((cat, i) => {
-            if (i !== activeIndex) {
-                html += `<h3>Other items by ${cat.name}</h3>`;
-                html += `<div class="grid">${renderItems(cat.items)}</div>`;
+            if(i !== idx) {
+                html += cat.items.slice(0, 2).map(item => `<div class="card"><div class="placeholder"></div><b>${item}</b></div>`).join('');
             }
         });
-        html += `</div>`;
-
+        
+        html += `</div></div>`;
         port.innerHTML = html;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function renderItems(items) {
-        return items.map(item => `
-            <div class="card">
-                <div class="placeholder-img"></div>
-                <strong>${item}</strong><br>
-                <small>$49.99</small>
-            </div>
-        `).join('');
-    }
-
-    // Load initial state
+    // Init
     switchTab(0);
 </script>
 
