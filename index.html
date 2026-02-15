@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comic Shop</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+        }
+        body { font-family: sans-serif; margin: 0; padding: 0; background: #f9f9f9; }
+        
+        /* 1. Header & Banner */
+        header { text-align: center; background: #fff; padding-top: 20px; }
+        .character-banner {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .character {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #ddd; /* Placeholder for image */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: transform 0.2s;
+        }
+        .character:hover { transform: scale(1.1); border-color: var(--accent); }
+        .character.active { border-color: var(--accent); background-color: #ffd1d1; }
+
+        /* 2. Navigation Tabs */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            background: var(--primary);
+        }
+        .tab-btn {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        .tab-btn:hover { background: rgba(255,255,255,0.1); }
+        .tab-btn.active { background: var(--accent); font-weight: bold; }
+
+        /* 3. Content Area */
+        main { max-width: 1000px; margin: 20px auto; padding: 20px; }
+        h2 { border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .card-img { height: 150px; background: #eee; margin-bottom: 10px; border-radius: 4px; }
+        .btn-buy {
+            background: var(--primary); color: white; border: none;
+            padding: 8px 16px; margin-top: 10px; cursor: pointer; width: 100%;
+        }
+        
+        /* Utility to hide sections */
+        .hidden { display: none; }
+        .cross-sell-section { opacity: 0.8; }
+        .cross-sell-section h2 { font-size: 1.2rem; border-color: #ccc; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h3>Choose your Style</h3>
+        <div class="character-banner">
+            <div class="character" onclick="switchTab('outfits')" id="char-outfits">Hero A<br>(Outfits)</div>
+            <div class="character" onclick="switchTab('accessories')" id="char-accessories">Hero B<br>(Access.)</div>
+            <div class="character" onclick="switchTab('jewelry')" id="char-jewelry">Hero C<br>(Jewelry)</div>
+        </div>
+
+        <nav class="tabs">
+            <button class="tab-btn active" onclick="switchTab('outfits')" id="tab-outfits">Outfits</button>
+            <button class="tab-btn" onclick="switchTab('accessories')" id="tab-accessories">Accessories</button>
+            <button class="tab-btn" onclick="switchTab('silver')" id="tab-silver">Silver Jewelry</button>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        </main>
+
+    <script>
+        // Mock Data Database
+        const products = {
+            outfits: [
+                { id: 1, name: "Hero Cape T-Shirt", price: 25 },
+                { id: 2, name: "Villain Hoodie", price: 45 },
+                { id: 3, name: "Sidekick Vest", price: 30 }
+            ],
+            accessories: [
+                { id: 4, name: "Utility Belt", price: 15 },
+                { id: 5, name: "Power Gloves", price: 20 },
+                { id: 6, name: "Mask", price: 10 }
+            ],
+            silver: [
+                { id: 7, name: "Silver Lightning Ring", price: 60 },
+                { id: 8, name: "Moon Pendant", price: 55 },
+                { id: 9, name: "Star Studs", price: 40 }
+            ]
+        };
+
+        // Helper to create HTML for a product card
+        function createCard(item) {
+            return `
+                <div class="card">
+                    <div class="card-img"></div>
+                    <h3>${item.name}</h3>
+                    <p>$${item.price}</p>
+                    <button class="btn-buy">Add to Cart</button>
+                </div>
+            `;
+        }
+
+        // Helper to render a grid of items
+        function renderGrid(items) {
+            return `<div class="grid">${items.map(item => createCard(item)).join('')}</div>`;
+        }
+
+        // Main Logic
+        function switchTab(category) {
+            const mainContent = document.getElementById('main-content');
+            
+            // 1. Update Active States for Tabs and Characters
+            document.querySelectorAll('.tab-btn, .character').forEach(el => el.classList.remove('active'));
+            
+            // Map 'silver' to 'jewelry' for ID matching if needed, logic simplified here:
+            let tabId = category === 'silver' ? 'tab-silver' : 'tab-' + category;
+            let charId = category === 'silver' ? 'char-jewelry' : 'char-' + category;
+            
+            // Handle edge case for silver/jewelry naming mismatch in IDs
+            if(category === 'jewelry') tabId = 'tab-silver'; 
+
+            if(document.getElementById(tabId)) document.getElementById(tabId).classList.add('active');
+            if(document.getElementById(charId)) document.getElementById(charId).classList.add('active');
+
+            // 2. Determine Primary vs Secondary Content
+            let primaryHTML = '';
+            let secondaryHTML = '';
+
+            // Logic: Render Primary, then filter the keys to find the other two
+            const allCategories = ['outfits', 'accessories', 'silver'];
+            
+            // Fix category name mapping for data lookup
+            let dataKey = category === 'jewelry' ? 'silver' : category;
+
+            // Render Primary
+            primaryHTML += `<h2>${dataKey.toUpperCase()} COLLECTION</h2>`;
+            primaryHTML += renderGrid(products[dataKey]);
+
+            // Render Secondary (The other two)
+            secondaryHTML += `<div class="cross-sell-section"><h2>YOU MIGHT ALSO LIKE</h2>`;
+            allCategories.forEach(cat => {
+                if (cat !== dataKey) {
+                    secondaryHTML += `<h3>From ${cat.charAt(0).toUpperCase() + cat.slice(1)}</h3>`;
+                    secondaryHTML += renderGrid(products[cat]);
+                }
+            });
+            secondaryHTML += `</div>`;
+
+            // 3. Inject into DOM
+            mainContent.innerHTML = primaryHTML + secondaryHTML;
+        }
+
+        // Initialize view
+        switchTab('outfits');
+    </script>
+</body>
+</html>
