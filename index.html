@@ -3,48 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comic Shop | Final Alignment</title>
+    <title>Comic Shop | Silhouette Shadows</title>
     <style>
         :root {
             --primary: #121212;
             --accent: #ff4757;
             --duration: 0.8s;
             --curve: cubic-bezier(0.65, 0, 0.35, 1);
-            /* Fixed height for all images to ensure uniformity */
-            --char-height: 350px; 
+            --char-height: 360px; 
         }
 
-        /* Remove the white bar at the top */
         body { font-family: 'Inter', sans-serif; margin: 0; background: #fff; overflow-x: hidden; }
 
         header { 
             background: #fff; 
-            padding: 0; /* Removed top padding */
+            padding: 0; 
             text-align: center; 
             position: relative;
         }
 
         .banner-viewport {
             position: relative;
-            max-width: 800px; /* Narrowed to bring characters closer */
-            height: 420px; /* Tall enough for 1.2x scale without clipping heads */
+            max-width: 800px;
+            height: 440px; 
             margin: 0 auto;
             display: flex;
-            align-items: flex-end; /* Anchors all characters to the bottom */
+            align-items: flex-end; 
             justify-content: center;
             overflow: hidden;
         }
 
         .char-container {
             position: absolute;
-            /* Anchors the scaling to the bottom center */
             transform-origin: bottom center; 
-            width: 280px;
+            width: 300px;
             height: var(--char-height);
             cursor: pointer;
             transition: transform var(--duration) var(--curve), opacity var(--duration) var(--curve);
             will-change: transform;
-            bottom: -10px; /* Peek 10px below the black bar */
+            bottom: -12px; /* Peeks slightly below the black bar */
         }
 
         .img-stack {
@@ -55,40 +52,39 @@
 
         .char-img {
             position: absolute;
-            bottom: 0; /* Glue image to bottom of container */
+            bottom: 0; 
             left: 0;
             width: 100%;
             height: 100%;
             object-fit: contain;
-            object-position: bottom; /* Anchor artwork to the bottom */
-            /* Force opaque background - white fallback */
-            background-color: #fff; 
+            object-position: bottom;
+            /* transparency-aware shadow: ignores the 'box' and shadows the 'person' */
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
             transition: opacity calc(var(--duration) / 2) ease-in-out;
         }
 
         .img-back { opacity: 0; }
         .img-front { opacity: 1; z-index: 2; }
 
-        /* --- Updated Position Logic --- */
+        /* --- Position Logic --- */
         
-        /* Center: 20% higher (scaled from bottom up) */
         .pos-center { 
             transform: translateX(-50%) scale(1.2); 
             z-index: 10; 
             opacity: 1; 
         }
 
-        /* Sides: Moved closer together (narrower translateX) */
+        /* Characters are now very close (overlapping about 40%) */
         .pos-left { 
-            transform: translateX(-115%) scale(1); 
+            transform: translateX(-110%) scale(1); 
             z-index: 5; 
-            opacity: 0.6; 
+            opacity: 0.7; 
         }
 
         .pos-right { 
-            transform: translateX(15%) scale(1); 
+            transform: translateX(10%) scale(1); 
             z-index: 5; 
-            opacity: 0.6; 
+            opacity: 0.7; 
         }
 
         .teleporting { transition: none !important; opacity: 0 !important; }
@@ -98,39 +94,41 @@
             display: flex; 
             justify-content: center; 
             background: var(--primary); 
-            position: relative; /* Sits over the -10px peeking images */
+            position: relative; 
             z-index: 20; 
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
         }
 
         .tab-btn { 
-            flex: 1; padding: 20px; border: none; background: none; 
-            color: #666; cursor: pointer; font-weight: 700; transition: 0.3s; 
+            flex: 1; padding: 22px; border: none; background: none; 
+            color: #777; cursor: pointer; font-weight: 800; transition: 0.3s; 
+            text-transform: uppercase; letter-spacing: 1px;
         }
         .tab-btn.active { color: #fff; box-shadow: inset 0 -4px 0 var(--accent); }
 
         .char-label {
             position: absolute;
-            top: -30px; /* Move label above heads or keep at bottom? Adjust as preferred */
+            top: -20px; 
             width: 100%;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 2px;
-            color: #ccc;
+            color: #ddd;
+            pointer-events: none;
         }
         .pos-center .char-label { color: var(--primary); }
 
         main { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .card { border: 1px solid #eee; padding: 20px; border-radius: 12px; text-align: center; }
-        .box { height: 180px; background: #f9f9f9; margin-bottom: 10px; }
+        .card { border: 1px solid #eee; padding: 20px; border-radius: 12px; text-align: center; background: white; }
+        .box { height: 180px; background: #f4f4f4; margin-bottom: 15px; border-radius: 8px; }
 
         @media (max-width: 600px) {
-            .banner-viewport { height: 320px; }
-            --char-height: 250px;
-            .pos-left { transform: translateX(-110%) scale(1); }
-            .pos-right { transform: translateX(10%) scale(1); }
+            .banner-viewport { height: 300px; }
+            :root { --char-height: 240px; }
+            .pos-left { transform: translateX(-105%) scale(1); }
+            .pos-right { transform: translateX(5%) scale(1); }
         }
     </style>
 </head>
@@ -162,9 +160,9 @@
     </div>
 
     <nav class="tabs">
-        <button class="tab-btn" onclick="switchTab(0)" id="btn-0">OUTFITS</button>
-        <button class="tab-btn" onclick="switchTab(1)" id="btn-1">ACCESSORIES</button>
-        <button class="tab-btn" onclick="switchTab(2)" id="btn-2">SILVER</button>
+        <button class="tab-btn" onclick="switchTab(0)" id="btn-0">Outfits</button>
+        <button class="tab-btn" onclick="switchTab(1)" id="btn-1">Accessories</button>
+        <button class="tab-btn" onclick="switchTab(2)" id="btn-2">Silver</button>
     </nav>
 </header>
 
@@ -172,9 +170,9 @@
 
 <script>
     const categories = [
-        { prefix: "kha", items: ["Cyber Suit", "Ghost Cloak"] },
-        { prefix: "saf", items: ["Tech Visor", "Utility Belt"] },
-        { prefix: "dav", items: ["Heavy Ring", "Silver Chain"] }
+        { prefix: "kha", items: ["Cyber Armor", "Neon Cloak"] },
+        { prefix: "saf", items: ["Pulse Visor", "Duty Belt"] },
+        { prefix: "dav", items: ["Onyx Ring", "Heavy Chain"] }
     ];
 
     let currentActive = 1;
@@ -201,14 +199,19 @@
             
             if (isTeleport) container.classList.add('teleporting');
 
+            // Update Back Image for the crossfade
             backImg.src = `characters/${cat.prefix}_${faces[i]}.png`;
+            
+            // Trigger Fade
             frontImg.style.opacity = '0';
             backImg.style.opacity = '1';
 
+            // Change Positions
             container.className = "char-container " + mapping[i];
             btn.classList.toggle('active', i === newIdx);
 
             setTimeout(() => {
+                // Finalize the swap
                 frontImg.src = backImg.src;
                 frontImg.style.transition = 'none';
                 frontImg.style.opacity = '1';
@@ -228,7 +231,7 @@
 
     function renderShop(idx) {
         const store = document.getElementById('storefront');
-        store.innerHTML = `<div class="grid">${categories[idx].items.map(item => `<div class="card"><div class="box"></div><b>${item}</b></div>`).join('')}</div>`;
+        store.innerHTML = `<div class="grid">${categories[idx].items.map(item => `<div class="card"><div class="box"></div><b>${item}</b><br><small>$120.00</small></div>`).join('')}</div>`;
     }
 
     window.onload = () => switchTab(1);
