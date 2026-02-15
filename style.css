@@ -6,30 +6,32 @@
     --char-height: 300px; 
 }
 
-/* 1. Global Reset - Removes white space at top */
+/* 1. RESET: Kill all top gaps */
+* { box-sizing: border-box; }
+
 html, body {
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
     background: #fff;
     overflow-x: hidden;
+    vertical-align: top;
 }
 
 header { 
-    background: #fff; 
+    display: block;
     margin: 0;
     padding: 0;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    background: #fff;
+    line-height: 0; /* Removes font-descent gaps */
 }
 
-/* 2. Banner Positioning */
 .banner-viewport {
     position: relative;
     width: 100%;
     max-width: 600px;
-    height: 380px; 
+    height: 350px; 
+    margin: 0 auto;
     display: flex;
     align-items: flex-end; 
     justify-content: center;
@@ -43,7 +45,7 @@ header {
     height: var(--char-height);
     cursor: pointer;
     transition: transform var(--duration) var(--curve), opacity var(--duration) var(--curve);
-    bottom: -10px; 
+    bottom: -5px; 
     left: 50%;
 }
 
@@ -61,13 +63,13 @@ header {
 .img-back { opacity: 0; }
 .img-front { opacity: 1; z-index: 2; }
 
-/* 3. Rotation States */
+/* 2. STATES */
 .pos-center { transform: translateX(-50%) scale(1.2); z-index: 10; opacity: 1; }
 .pos-left   { transform: translateX(-115%) scale(1); z-index: 5; opacity: 0.7; }
 .pos-right  { transform: translateX(15%) scale(1); z-index: 5; opacity: 0.7; }
 .teleporting { transition: none !important; opacity: 0 !important; }
 
-/* 4. Sticky Navigation */
+/* 3. TABS (Sticky) */
 .tabs { 
     display: flex; 
     justify-content: center; 
@@ -76,39 +78,31 @@ header {
     position: sticky; 
     top: 0;
     z-index: 100; 
-    box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    line-height: normal; /* Restore line height for buttons */
 }
 
 .tab-btn { 
-    flex: 1; 
-    max-width: 200px; 
-    padding: 20px; 
-    border: none; 
-    background: none; 
-    color: #777; 
-    cursor: pointer; 
-    font-weight: 800; 
-    text-transform: uppercase; 
-    font-size: 0.75rem;
-    transition: 0.3s;
+    flex: 1; max-width: 200px; padding: 18px; border: none; background: none; 
+    color: #777; cursor: pointer; font-weight: 800; text-transform: uppercase; font-size: 0.75rem;
 }
 .tab-btn.active { color: #fff; box-shadow: inset 0 -4px 0 var(--accent); }
 
-/* 5. Shop Grid & Items */
+/* 4. SHOP GRID */
 main { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
-h2 { font-size: 1.5rem; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 50px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-.card { border: 1px solid #eee; padding: 20px; border-radius: 12px; text-align: center; display: flex; flex-direction: column; background: white; }
-.box { height: 180px; background: #f4f4f4; margin-bottom: 15px; border-radius: 8px; }
-.buy-btn { 
-    background: var(--primary); 
-    color: white; 
-    padding: 12px; 
-    border-radius: 6px; 
-    text-decoration: none; 
-    font-weight: bold; 
-    margin-top: auto; 
-    font-size: 0.8rem;
-    transition: 0.2s;
+.card { border: 1px solid #eee; padding: 15px; border-radius: 12px; text-align: center; background: white; }
+
+.product-img { 
+    width: 100%; 
+    height: 180px; 
+    object-fit: cover; 
+    margin-bottom: 15px; 
+    border-radius: 8px;
+    background: #f9f9f9;
 }
-.buy-btn:hover { background: var(--accent); }
+
+.buy-btn { 
+    background: var(--primary); color: white; padding: 12px; border-radius: 6px; 
+    text-decoration: none; font-weight: bold; margin-top: 10px; display: block; font-size: 0.8rem;
+}

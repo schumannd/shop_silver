@@ -5,6 +5,9 @@ function switchTab(newIdx) {
     if (newIdx === currentActive || isMoving) return;
     isMoving = true;
 
+    // Update the URL hash without reloading
+    window.location.hash = (newIdx + 1);
+
     const leftIdx = (newIdx + 2) % 3;
     const rightIdx = (newIdx + 1) % 3;
 
@@ -17,22 +20,17 @@ function switchTab(newIdx) {
         const backImg = document.getElementById(`img-back-${i}`);
         const btn = document.getElementById(`btn-${i}`);
 
-        // Handle the loop teleportation
         if ((container.classList.contains('pos-left') && mapping[i] === 'pos-right') || 
             (container.classList.contains('pos-right') && mapping[i] === 'pos-left')) {
             container.classList.add('teleporting');
         }
 
-        // Trigger Cross-fade
         backImg.src = `characters/${cat.prefix}_${faces[i]}.png`;
         frontImg.style.opacity = '0';
         backImg.style.opacity = '1';
-        
-        // Move container
         container.className = "char-container " + mapping[i];
         btn.classList.toggle('active', i === newIdx);
 
-        // Reset for next movement
         setTimeout(() => {
             frontImg.src = backImg.src;
             frontImg.style.transition = 'none';
@@ -54,24 +52,22 @@ function renderShop(idx) {
     const store = document.getElementById('storefront');
     const mainCat = SHOP_DATA[idx];
     
-    // Main Section
     let html = `<h2>${mainCat.name} Collection</h2><div class="grid">`;
     html += mainCat.items.map(item => `
         <div class="card">
-            <div class="box"></div>
+            <img src="${item.img}" class="product-img" onerror="this.src='https://via.placeholder.com/200x180?text=No+Image'">
             <b>${item.name}</b>
             <p>${item.price}</p>
             <a href="${item.link}" target="_blank" class="buy-btn">BUY NOW</a>
         </div>`).join('');
     html += `</div>`;
 
-    // "Complete the Set" (Cross-sell: 2 items from each other character)
     html += `<h2>Complete the Set</h2><div class="grid">`;
     SHOP_DATA.forEach((cat, cIdx) => {
         if (cIdx !== idx) {
             html += cat.items.slice(0, 2).map(item => `
                 <div class="card">
-                    <div class="box"></div>
+                    <img src="${item.img}" class="product-img" onerror="this.src='https://via.placeholder.com/200x180?text=No+Image'">
                     <b>${item.name}</b>
                     <p>${item.price}</p>
                     <a href="${item.link}" target="_blank" class="buy-btn">BUY NOW</a>
@@ -82,13 +78,17 @@ function renderShop(idx) {
     store.innerHTML = html;
 }
 
-// Startup Logic
-window.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    const shopParam = params.get('shop')?.toLowerCase();
+// Initial Load Logic
+function loadFromHash() {
+    const hash = window.location.hash.replace('#', '');
+    let index = parseInt(hash) - 1;
     
-    let startIndex = SHOP_DATA.findIndex(c => c.slug === shopParam);
-    if (startIndex === -1) startIndex = Math.floor(Math.random() * 3);
+    if (isNaN(index) || index < 0 || index > 2) {
+        index = Math.floor(Math.random() * 3);
+    }
+    switchTab(index);
+}
 
-    switchTab(startIndex);
-});
+window.addEventListener('DOMContentLoaded', loadFromHash);
+// Handle back/forward button
+window.addEventListener('hashchange', loadFromHash);
