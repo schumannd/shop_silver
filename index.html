@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comic Shop | Silhouette Shadows</title>
+    <title>Comic Shop | Perfectly Centered</title>
     <style>
         :root {
             --primary: #121212;
             --accent: #ff4757;
             --duration: 0.8s;
             --curve: cubic-bezier(0.65, 0, 0.35, 1);
-            --char-height: 360px; 
+            /* Reduced height for better screen fit */
+            --char-height: 280px; 
         }
 
         body { font-family: 'Inter', sans-serif; margin: 0; background: #fff; overflow-x: hidden; }
@@ -20,13 +21,17 @@
             padding: 0; 
             text-align: center; 
             position: relative;
+            /* Ensure everything is centered in the header */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .banner-viewport {
             position: relative;
-            max-width: 800px;
-            height: 440px; 
-            margin: 0 auto;
+            width: 100%;
+            max-width: 600px; /* Narrowed to keep characters tight and centered */
+            height: 350px; 
             display: flex;
             align-items: flex-end; 
             justify-content: center;
@@ -36,12 +41,13 @@
         .char-container {
             position: absolute;
             transform-origin: bottom center; 
-            width: 300px;
+            width: 220px; /* Reduced width */
             height: var(--char-height);
             cursor: pointer;
             transition: transform var(--duration) var(--curve), opacity var(--duration) var(--curve);
             will-change: transform;
-            bottom: -12px; /* Peeks slightly below the black bar */
+            bottom: -10px; /* Peeks below the black bar */
+            left: 50%; /* Center anchor */
         }
 
         .img-stack {
@@ -58,15 +64,15 @@
             height: 100%;
             object-fit: contain;
             object-position: bottom;
-            /* transparency-aware shadow: ignores the 'box' and shadows the 'person' */
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
-            transition: opacity calc(var(--duration) / 2) ease-in-out;
+            /* Shadow traces the character silhouette (Requires Transparent PNGs!) */
+            filter: drop-shadow(0 5px 12px rgba(0,0,0,0.15));
+            transition: opacity 0.4s ease-in-out;
         }
 
         .img-back { opacity: 0; }
         .img-front { opacity: 1; z-index: 2; }
 
-        /* --- Position Logic --- */
+        /* --- Precise Centered Positioning --- */
         
         .pos-center { 
             transform: translateX(-50%) scale(1.2); 
@@ -74,35 +80,43 @@
             opacity: 1; 
         }
 
-        /* Characters are now very close (overlapping about 40%) */
         .pos-left { 
-            transform: translateX(-110%) scale(1); 
+            transform: translateX(-115%) scale(1); 
             z-index: 5; 
             opacity: 0.7; 
         }
 
         .pos-right { 
-            transform: translateX(10%) scale(1); 
+            transform: translateX(15%) scale(1); 
             z-index: 5; 
             opacity: 0.7; 
         }
 
         .teleporting { transition: none !important; opacity: 0 !important; }
 
-        /* --- Navigation & Store --- */
+        /* --- Navigation --- */
         .tabs { 
             display: flex; 
             justify-content: center; 
             background: var(--primary); 
+            width: 100%;
             position: relative; 
             z-index: 20; 
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
         }
 
         .tab-btn { 
-            flex: 1; padding: 22px; border: none; background: none; 
-            color: #777; cursor: pointer; font-weight: 800; transition: 0.3s; 
-            text-transform: uppercase; letter-spacing: 1px;
+            flex: 1; 
+            max-width: 200px;
+            padding: 18px; 
+            border: none; 
+            background: none; 
+            color: #777; 
+            cursor: pointer; 
+            font-weight: 800; 
+            transition: 0.3s; 
+            text-transform: uppercase; 
+            font-size: 0.75rem;
         }
         .tab-btn.active { color: #fff; box-shadow: inset 0 -4px 0 var(--accent); }
 
@@ -110,26 +124,18 @@
             position: absolute;
             top: -20px; 
             width: 100%;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #ddd;
+            color: #ccc;
             pointer-events: none;
         }
         .pos-center .char-label { color: var(--primary); }
 
-        main { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .card { border: 1px solid #eee; padding: 20px; border-radius: 12px; text-align: center; background: white; }
-        .box { height: 180px; background: #f4f4f4; margin-bottom: 15px; border-radius: 8px; }
-
-        @media (max-width: 600px) {
-            .banner-viewport { height: 300px; }
-            :root { --char-height: 240px; }
-            .pos-left { transform: translateX(-105%) scale(1); }
-            .pos-right { transform: translateX(5%) scale(1); }
-        }
+        main { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+        .card { border: 1px solid #eee; padding: 15px; border-radius: 8px; text-align: center; }
+        .box { height: 140px; background: #f4f4f4; margin-bottom: 10px; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -170,9 +176,9 @@
 
 <script>
     const categories = [
-        { prefix: "kha", items: ["Cyber Armor", "Neon Cloak"] },
-        { prefix: "saf", items: ["Pulse Visor", "Duty Belt"] },
-        { prefix: "dav", items: ["Onyx Ring", "Heavy Chain"] }
+        { prefix: "kha", items: ["Suit A", "Cloak B"] },
+        { prefix: "saf", items: ["Visor X", "Belt Y"] },
+        { prefix: "dav", items: ["Ring 1", "Chain 2"] }
     ];
 
     let currentActive = 1;
@@ -199,19 +205,14 @@
             
             if (isTeleport) container.classList.add('teleporting');
 
-            // Update Back Image for the crossfade
             backImg.src = `characters/${cat.prefix}_${faces[i]}.png`;
-            
-            // Trigger Fade
             frontImg.style.opacity = '0';
             backImg.style.opacity = '1';
 
-            // Change Positions
             container.className = "char-container " + mapping[i];
             btn.classList.toggle('active', i === newIdx);
 
             setTimeout(() => {
-                // Finalize the swap
                 frontImg.src = backImg.src;
                 frontImg.style.transition = 'none';
                 frontImg.style.opacity = '1';
@@ -231,7 +232,7 @@
 
     function renderShop(idx) {
         const store = document.getElementById('storefront');
-        store.innerHTML = `<div class="grid">${categories[idx].items.map(item => `<div class="card"><div class="box"></div><b>${item}</b><br><small>$120.00</small></div>`).join('')}</div>`;
+        store.innerHTML = `<div class="grid">${categories[idx].items.map(item => `<div class="card"><div class="box"></div><b>${item}</b></div>`).join('')}</div>`;
     }
 
     window.onload = () => switchTab(1);
