@@ -3,87 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comic Shop | Smooth Circular Rotation</title>
+    <title>Comic Shop | Professional Rotation</title>
     <style>
         :root {
             --primary: #121212;
             --accent: #ff4757;
             --bg: #fdfdfd;
-            --duration: 0.7s; /* Control speed of rotation here */
+            --duration: 0.8s;
+            --curve: cubic-bezier(0.65, 0, 0.35, 1);
         }
 
         body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); }
 
-        /* --- The Banner Section --- */
-        header { 
-            background: white; 
-            padding-top: 20px;
-            text-align: center;
-            overflow: hidden;
-            border-bottom: 1px solid #eee;
-        }
+        header { background: white; padding-top: 20px; text-align: center; overflow: hidden; }
 
         .banner-viewport {
             position: relative;
             max-width: 900px;
-            height: 380px; /* High enough to prevent clipping */
+            height: 380px;
             margin: 0 auto;
-            /* Masks the bottom 10% of the art */
-            -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
-            mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
         }
 
         .char-container {
             position: absolute;
             top: 0;
             left: 50%;
-            width: 280px;
+            width: 260px;
             height: 100%;
             cursor: pointer;
-            transition: transform var(--duration) cubic-bezier(0.4, 0, 0.2, 1), 
-                        opacity var(--duration), 
-                        z-index 0s var(--duration) / 2; /* Delay Z-index change to mid-animation */
             display: flex;
             flex-direction: column;
             align-items: center;
+            /* Smoothly animate all movement/scale */
+            transition: transform var(--duration) var(--curve), opacity var(--duration) var(--curve);
+            will-change: transform, opacity;
         }
 
-        /* Initial Load - No Animation */
-        .no-transition .char-container {
-            transition: none !important;
-        }
-
-        /* Image Sizing & Top Alignment */
+        /* The Image Layer */
         .char-img {
             width: 100%;
             height: 90%;
             object-fit: contain;
-            object-position: top; /* Heads always at top */
-            transition: opacity 0.2s;
+            object-position: top;
             filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
+            /* Image specific cross-fade */
+            transition: opacity 0.4s ease-in-out;
         }
 
-        /* --- Position Logic (Transforms) --- */
+        /* --- Dynamic Position States --- */
         
-        /* Center (Active) - 20% Larger */
         .pos-center {
             transform: translateX(-50%) scale(1.2);
             z-index: 10;
             opacity: 1;
         }
 
-        /* Left - 30-40% Overlap achieved via translation values */
         .pos-left {
-            transform: translateX(-130%) scale(1);
+            transform: translateX(-140%) scale(0.9);
             z-index: 5;
-            opacity: 0.6;
+            opacity: 0.5;
         }
 
-        /* Right */
         .pos-right {
-            transform: translateX(30%) scale(1);
+            transform: translateX(40%) scale(0.9);
             z-index: 5;
-            opacity: 0.6;
+            opacity: 0.5;
+        }
+
+        /* Hide the character that is "teleporting" across the back */
+        .teleporting {
+            transition: none !important;
+            opacity: 0 !important;
         }
 
         .char-label {
@@ -97,7 +89,7 @@
         }
         .pos-center .char-label { color: var(--primary); }
 
-        /* --- Standard Shop UI --- */
+        /* --- Shop UI --- */
         .tabs { display: flex; justify-content: center; background: var(--primary); position: sticky; top: 0; z-index: 1000; }
         .tab-btn { flex: 1; padding: 20px; border: none; background: none; color: #666; cursor: pointer; font-weight: 700; transition: 0.3s; }
         .tab-btn.active { color: #fff; box-shadow: inset 0 -4px 0 var(--accent); }
@@ -105,28 +97,25 @@
         main { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
         .card { background: white; border: 1px solid #eee; padding: 15px; border-radius: 8px; text-align: center; }
-        .box { height: 160px; background: #f0f0f0; margin-bottom: 10px; border-radius: 4px; }
+        .box { height: 160px; background: #f0f0f0; margin-bottom: 10px; }
 
-        @media (max-width: 600px) {
-            .banner-viewport { height: 260px; }
-            .char-container { width: 180px; }
-            .pos-left { transform: translateX(-120%) scale(1); }
-            .pos-right { transform: translateX(20%) scale(1); }
-        }
+        .no-anim { transition: none !important; }
     </style>
 </head>
-<body class="no-transition"> <header>
-    <div class="banner-viewport">
-        <div class="char-container" onclick="switchTab(0)" id="char-0">
-            <img src="characters/kha_straight.png" class="char-img" id="img-0">
+<body>
+
+<header>
+    <div class="banner-viewport" id="banner">
+        <div class="char-container pos-left" onclick="switchTab(0)" id="char-0">
+            <img src="characters/kha_left.png" class="char-img" id="img-0">
             <span class="char-label">Outfits</span>
         </div>
-        <div class="char-container" onclick="switchTab(1)" id="char-1">
+        <div class="char-container pos-center" onclick="switchTab(1)" id="char-1">
             <img src="characters/saf_straight.png" class="char-img" id="img-1">
             <span class="char-label">Accessories</span>
         </div>
-        <div class="char-container" onclick="switchTab(2)" id="char-2">
-            <img src="characters/dav_straight.png" class="char-img" id="img-2">
+        <div class="char-container pos-right" onclick="switchTab(2)" id="char-2">
+            <img src="characters/dav_right.png" class="char-img" id="img-2">
             <span class="char-label">Silver</span>
         </div>
     </div>
@@ -142,28 +131,30 @@
 
 <script>
     const categories = [
-        { name: "Outfits", prefix: "kha", items: ["Cyber Cloak", "Pulse Vest", "Drift Boots"] },
-        { name: "Accessories", prefix: "saf", items: ["Lens V2", "Utility Sling", "Tactical Belt"] },
-        { name: "Silver", prefix: "dav", items: ["Heavy Ring", "Link Chain", "Crest Studs"] }
+        { prefix: "kha", items: ["Cyber Cloak", "Pulse Vest"] },
+        { prefix: "saf", items: ["Lens V2", "Utility Sling"] },
+        { prefix: "dav", items: ["Heavy Ring", "Link Chain"] }
     ];
 
-    let currentActive = -1;
+    let currentActive = 1; // Start with Accessories (Center)
+    let isMoving = false;
 
-    function switchTab(index) {
-        if (index === currentActive) return;
-        currentActive = index;
+    function switchTab(newIdx) {
+        if (newIdx === currentActive || isMoving) return;
+        isMoving = true;
 
-        const leftIdx = (index + 2) % 3;
-        const rightIdx = (index + 1) % 3;
+        const leftIdx = (newIdx + 2) % 3;
+        const rightIdx = (newIdx + 1) % 3;
 
-        const posClasses = {
-            [index]: "pos-center",
+        // Position Logic Mapping
+        const mapping = {
+            [newIdx]: "pos-center",
             [leftIdx]: "pos-left",
             [rightIdx]: "pos-right"
         };
 
         const faces = {
-            [index]: "straight",
+            [newIdx]: "straight",
             [leftIdx]: "left",
             [rightIdx]: "right"
         };
@@ -173,43 +164,48 @@
             const img = document.getElementById(`img-${i}`);
             const btn = document.getElementById(`btn-${i}`);
 
-            // 1. Position Slide
-            container.className = "char-container " + posClasses[i];
-            btn.classList.toggle('active', i === index);
+            // 1. Identify if this character is "Teleporting" 
+            // (e.g. moving from Far Left to Far Right without passing center)
+            const movingFromLeftToRight = (container.classList.contains('pos-left') && mapping[i] === 'pos-right');
+            const movingFromRightToLeft = (container.classList.contains('pos-right') && mapping[i] === 'pos-left');
 
-            // 2. Smooth Image Face Change
-            // We dip opacity halfway through the slide to mask the source swap
+            if (movingFromLeftToRight || movingFromRightToLeft) {
+                container.classList.add('teleporting');
+            }
+
+            // 2. Start the Fade out of the OLD face
+            img.style.opacity = '0';
+
+            // 3. Move the container & Swap the Image
             setTimeout(() => {
-                img.style.opacity = '0';
+                container.className = "char-container " + mapping[i];
+                img.src = `characters/${cat.prefix}_${faces[i]}.png`;
+                btn.classList.toggle('active', i === newIdx);
+
+                // 4. Fade the NEW face in while it arrives
                 setTimeout(() => {
-                    img.src = `characters/${cat.prefix}_${faces[i]}.png`;
                     img.style.opacity = '1';
-                }, 100);
-            }, 200);
+                    container.classList.remove('teleporting');
+                }, 50);
+            }, 100); 
         });
 
-        renderShop(index);
+        currentActive = newIdx;
+        renderShop(newIdx);
+
+        // Unlock movement
+        setTimeout(() => { isMoving = false; }, 800);
     }
 
     function renderShop(idx) {
         const store = document.getElementById('storefront');
-        const cat = categories[idx];
-        let html = `<h2>${cat.name}</h2><div class="grid">`;
-        html += cat.items.map(item => `<div class="card"><div class="box"></div><b>${item}</b><br><small>$120</small></div>`).join('');
-        html += `</div>`;
-        store.innerHTML = html;
+        store.innerHTML = `<div class="grid">${categories[idx].items.map(item => `<div class="card"><div class="box"></div><b>${item}</b></div>`).join('')}</div>`;
     }
 
-    // Initialize Logic
-    window.addEventListener('DOMContentLoaded', () => {
-        // Run initial setup without transitions
-        switchTab(0);
-        
-        // Small timeout to allow the browser to paint the initial state
-        setTimeout(() => {
-            document.body.classList.remove('no-transition');
-        }, 100);
-    });
+    // Init without jank
+    window.onload = () => {
+        switchTab(1); // Set initial center
+    };
 </script>
 
 </body>
