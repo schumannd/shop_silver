@@ -3,87 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comic Shop | Dynamic Reorder</title>
+    <title>Comic Shop | Circular Rotation</title>
     <style>
         :root {
             --primary: #121212;
-            --accent: #00d2ff;
-            --bg: #fdfdfd;
-            --transition-speed: 0.4s;
+            --accent: #ff4757;
+            --transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; margin: 0; background: #fdfdfd; overflow-x: hidden; }
 
-        /* --- Character Banner (The Core Logic) --- */
-        header { background: #fff; padding: 40px 0 20px; text-align: center; overflow: hidden; }
+        /* --- Header & Circular Banner --- */
+        header { 
+            background: white; 
+            padding: 60px 0 20px; 
+            text-align: center; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
         
         .character-banner {
             display: flex;
             justify-content: center;
-            align-items: flex-end;
-            max-width: 600px;
+            align-items: flex-end; /* Aligns them to the bottom so height diff is visible */
+            max-width: 700px;
             margin: 0 auto;
-            perspective: 1000px; /* For the rotation effect */
+            height: 250px; /* Constrain height to keep layout stable */
         }
 
         .char-container {
-            flex: 0 0 40%; /* Each takes 40% width */
-            cursor: pointer;
             position: relative;
-            transition: all var(--transition-speed) ease-in-out;
+            cursor: pointer;
+            transition: all var(--transition);
+            width: 200px; /* Fixed base width */
             z-index: 1;
-            margin: 0 -5%; /* Initial slight overlap */
         }
 
-        /* The Overlap Logic: Active character is on top and pushed to the middle */
-        .char-container.active {
+        /* --- Height & Overlap Logic --- */
+        
+        /* Middle / Active character */
+        .char-container.pos-center {
             z-index: 10;
-            flex: 0 0 45%;
-            margin: 0 -15%; /* Creates the 30-40% overlap on neighbors */
-            transform: scale(1.1);
+            transform: scale(1.2); /* 20% higher and wider */
+            margin: 0 -60px; /* Creates the 30-40% overlap on side neighbors */
+        }
+
+        /* Side characters */
+        .char-container.pos-left, .char-container.pos-right {
+            z-index: 1;
+            transform: scale(1);
+            opacity: 0.7;
         }
 
         .char-img {
             width: 100%;
             height: auto;
             display: block;
-            transition: opacity 0.2s ease, transform var(--transition-speed) ease;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
-        }
-
-        /* Subtle rotation/blend effect during switch */
-        .char-container.switching .char-img {
-            opacity: 0.5;
-            transform: rotateY(15deg) scale(0.95);
+            transition: opacity 0.3s ease;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));
         }
 
         .char-label { 
             display: block; 
-            margin-top: 15px; 
+            margin-top: 20px;
             font-size: 0.7rem; 
             font-weight: 900; 
+            letter-spacing: 2px;
             text-transform: uppercase;
             color: #ccc;
-            letter-spacing: 2px;
+            transition: color 0.3s;
         }
-        .active .char-label { color: var(--primary); }
+        .pos-center .char-label { color: var(--primary); }
 
-        /* --- Tabs --- */
+        /* --- Tabs & Navigation --- */
         .tabs { display: flex; justify-content: center; background: var(--primary); position: sticky; top: 0; z-index: 1000; }
-        .tab-btn { flex: 1; padding: 18px 5px; border: none; background: none; color: #555; cursor: pointer; font-weight: 700; transition: 0.3s; }
+        .tab-btn { flex: 1; padding: 20px 5px; border: none; background: none; color: #666; cursor: pointer; font-weight: 700; transition: 0.3s; font-size: 0.8rem; }
         .tab-btn.active { color: #fff; box-shadow: inset 0 -4px 0 var(--accent); }
 
-        /* --- Content --- */
-        main { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; margin-bottom: 50px; }
-        .card { background: white; border: 1px solid #eee; padding: 15px; text-align: center; border-radius: 8px; }
-        .placeholder { height: 150px; background: #f9f9f9; margin-bottom: 10px; border-radius: 4px; }
-        
-        .cross-sell { opacity: 0.7; border-top: 1px solid #eee; padding-top: 30px; }
+        /* --- Content Layout --- */
+        main { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-bottom: 60px; }
+        .card { background: white; border: 1px solid #eee; padding: 20px; border-radius: 12px; text-align: center; transition: transform 0.3s; }
+        .card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .img-placeholder { height: 180px; background: #f0f0f0; margin-bottom: 15px; border-radius: 8px; }
 
         @media (max-width: 600px) {
-            .char-container { flex: 0 0 50%; }
-            .char-container.active { flex: 0 0 60%; margin: 0 -20%; }
+            .character-banner { height: 180px; }
+            .char-container { width: 140px; }
+            .char-container.pos-center { margin: 0 -45px; }
             .grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
@@ -92,15 +98,15 @@
 
 <header>
     <div class="character-banner" id="banner">
-        <div class="char-container" onclick="switchTab(0)" id="char-0" style="order: 1;">
+        <div class="char-container" onclick="switchTab(0)" id="char-0">
             <img src="characters/kha_straight.png" class="char-img" id="img-0">
             <span class="char-label">Outfits</span>
         </div>
-        <div class="char-container" onclick="switchTab(1)" id="char-1" style="order: 2;">
+        <div class="char-container" onclick="switchTab(1)" id="char-1">
             <img src="characters/saf_straight.png" class="char-img" id="img-1">
             <span class="char-label">Accessories</span>
         </div>
-        <div class="char-container" onclick="switchTab(2)" id="char-2" style="order: 3;">
+        <div class="char-container" onclick="switchTab(2)" id="char-2">
             <img src="characters/dav_straight.png" class="char-img" id="img-2">
             <span class="char-label">Silver</span>
         </div>
@@ -113,78 +119,87 @@
     </nav>
 </header>
 
-<main id="view-port"></main>
+<main id="content-area"></main>
 
 <script>
     const categories = [
-        { name: "Outfits", prefix: "kha", items: ["Cyber Jacket", "Street Kimono", "Neon Tech Pants"] },
-        { name: "Accessories", prefix: "saf", items: ["Glass Visor", "Tactical Scarf", "Data Watch"] },
-        { name: "Silver", prefix: "dav", items: ["Link Chain", "Engraved Band", "Blade Pendant"] }
+        { name: "Outfits", prefix: "kha", items: ["Stealth Jacket", "Hero Armor", "Swift Boots"] },
+        { name: "Accessories", prefix: "saf", items: ["Tech Visor", "Power Belt", "Utility Gloves"] },
+        { name: "Silver", prefix: "dav", items: ["Ancient Ring", "Core Pendant", "Heavy Chain"] }
     ];
 
     function switchTab(activeIndex) {
-        const containers = [0, 1, 2];
+        // Calculate the circular positions
+        const leftIdx = (activeIndex + 2) % 3;
+        const rightIdx = (activeIndex + 1) % 3;
 
-        containers.forEach(i => {
+        const posMap = {
+            [activeIndex]: "pos-center",
+            [leftIdx]: "pos-left",
+            [rightIdx]: "pos-right"
+        };
+
+        const faceMap = {
+            [activeIndex]: "straight",
+            [leftIdx]: "left",
+            [rightIdx]: "right"
+        };
+
+        // Apply visual updates
+        categories.forEach((cat, i) => {
             const container = document.getElementById(`char-${i}`);
             const img = document.getElementById(`img-${i}`);
             const btn = document.getElementById(`btn-${i}`);
-            
-            // Trigger blend/rotation animation
-            container.classList.add('switching');
-            
-            // Set visual position (order)
-            // Logic: active is always order 2. 
-            // If active is 0: [1(order1), 0(order2), 2(order3)]
-            // If active is 1: [0(order1), 1(order2), 2(order3)]
-            // If active is 2: [0(order1), 2(order2), 1(order3)]
-            if (i === activeIndex) {
-                container.style.order = 2;
-                container.classList.add('active');
-                btn.classList.add('active');
-                img.src = `characters/${categories[i].prefix}_straight.png`;
-            } else {
-                container.classList.remove('active');
-                btn.classList.remove('active');
-                
-                // Determine if this char should be on the left or right of center
-                if ((activeIndex === 0 && i === 1) || (activeIndex === 1 && i === 0) || (activeIndex === 2 && i === 0)) {
-                    container.style.order = 1;
-                    img.src = `characters/${categories[i].prefix}_left.png`;
-                } else {
-                    container.style.order = 3;
-                    img.src = `characters/${categories[i].prefix}_right.png`;
-                }
-            }
 
-            // Remove animation class after transition finishes
+            // Reset classes
+            container.className = "char-container " + posMap[i];
+            
+            // Set Tab Button active state
+            btn.classList.toggle('active', i === activeIndex);
+
+            // Blend/Rotate Image Logic
+            // We use a small timeout to fade opacity if you wanted a smoother "swap"
+            img.style.opacity = '0.5';
             setTimeout(() => {
-                container.classList.remove('switching');
-            }, 300);
+                img.src = `characters/${cat.prefix}_${faceMap[i]}.png`;
+                img.style.opacity = '1';
+            }, 150);
+
+            // Reorder the elements in the flexbox visually
+            // Left gets order 1, Center gets 2, Right gets 3
+            if (i === activeIndex) container.style.order = 2;
+            else if (i === leftIdx) container.style.order = 1;
+            else container.style.order = 3;
         });
 
-        renderStore(activeIndex);
+        renderShop(activeIndex);
     }
 
-    function renderStore(idx) {
-        const port = document.getElementById('view-port');
+    function renderShop(idx) {
+        const area = document.getElementById('content-area');
         const main = categories[idx];
         
-        let html = `<h2>${main.name}</h2><div class="grid">`;
-        html += main.items.map(item => `<div class="card"><div class="placeholder"></div><b>${item}</b><br><small>$50</small></div>`).join('');
-        html += `</div><div class="cross-sell"><h3>Complete your look</h3><div class="grid">`;
-        
+        let html = `<h2>${main.name} Collection</h2><div class="grid">`;
+        html += main.items.map(item => `
+            <div class="card">
+                <div class="img-placeholder"></div>
+                <b>${item}</b><br><small>$99.00</small>
+            </div>`).join('');
+        html += `</div>`;
+
+        // Cross-sell
+        html += `<hr style="border:0; border-top:1px solid #eee; margin: 40px 0;"><h3>Complete the Set</h3><div class="grid">`;
         categories.forEach((cat, i) => {
             if(i !== idx) {
-                html += cat.items.slice(0, 2).map(item => `<div class="card"><div class="placeholder"></div><b>${item}</b></div>`).join('');
+                html += `<div class="card"><div class="img-placeholder"></div><b>${cat.items[0]}</b></div>`;
             }
         });
-        
-        html += `</div></div>`;
-        port.innerHTML = html;
+        html += `</div>`;
+
+        area.innerHTML = html;
     }
 
-    // Init
+    // Initialize
     switchTab(0);
 </script>
 
