@@ -1,5 +1,7 @@
 let currentActive = -1;
 let isMoving = false;
+let touchStartX = 0; // Added for swipe tracking
+let touchEndX = 0;   // Added for swipe tracking
 
 function switchTab(newIdx) {
     if (newIdx === currentActive || isMoving) return;
@@ -78,6 +80,24 @@ function renderShop(idx) {
     store.innerHTML = html;
 }
 
+// --- NEW: SWIPE LOGIC ---
+function handleGesture() {
+    const swipeThreshold = 50; // Minimum distance for a swipe
+    const diff = touchStartX - touchEndX;
+
+    if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0) {
+            // Swiped Left -> Show next character
+            let next = (currentActive + 1) % 3;
+            switchTab(next);
+        } else {
+            // Swiped Right -> Show previous character
+            let prev = (currentActive + 2) % 3;
+            switchTab(prev);
+        }
+    }
+}
+
 // Initial Load Logic
 function loadFromHash() {
     const hash = window.location.hash.replace('#', '');
@@ -89,6 +109,21 @@ function loadFromHash() {
     switchTab(index);
 }
 
-window.addEventListener('DOMContentLoaded', loadFromHash);
+window.addEventListener('DOMContentLoaded', () => {
+    // Attach touch listeners to the banner
+    const viewport = document.querySelector('.banner-viewport');
+    
+    viewport.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, {passive: true});
+
+    viewport.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleGesture();
+    }, {passive: true});
+
+    loadFromHash();
+});
+
 // Handle back/forward button
 window.addEventListener('hashchange', loadFromHash);

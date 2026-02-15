@@ -26,8 +26,7 @@ const SHOP_DATA = [
             { name: "Silver Chain L", price: "$150", link: "#", img: "products/silver1.jpg" },
             { name: "Heart Bracelet M", price: "$210", link: "#", img: "products/silver2.jpg" },
             { name: "Silver Chain XL", price: "$90", link: "#", img: "products/silver3.jpg" },
-            { name: "Link Bracelet L", price: "$180", link: "#", img: "products/silver4.jpg" },
-            { name: "Barbed Wire Bracelet", price: "$180", link: "#", img: "products/silver5.jpg" }
+            { name: "Link Bracelet L", price: "$180", link: "#", img: "products/silver4.jpg" }
         ] 
     }
 ];
