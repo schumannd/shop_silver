@@ -3,140 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comic Shop | Perfectly Centered</title>
-    <style>
-        :root {
-            --primary: #121212;
-            --accent: #ff4757;
-            --duration: 0.8s;
-            --curve: cubic-bezier(0.65, 0, 0.35, 1);
-            /* Reduced height for better screen fit */
-            --char-height: 280px; 
-        }
-
-        body { font-family: 'Inter', sans-serif; margin: 0; background: #fff; overflow-x: hidden; }
-
-        header { 
-            background: #fff; 
-            padding: 0; 
-            text-align: center; 
-            position: relative;
-            /* Ensure everything is centered in the header */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .banner-viewport {
-            position: relative;
-            width: 100%;
-            max-width: 600px; /* Narrowed to keep characters tight and centered */
-            height: 350px; 
-            display: flex;
-            align-items: flex-end; 
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .char-container {
-            position: absolute;
-            transform-origin: bottom center; 
-            width: 220px; /* Reduced width */
-            height: var(--char-height);
-            cursor: pointer;
-            transition: transform var(--duration) var(--curve), opacity var(--duration) var(--curve);
-            will-change: transform;
-            bottom: -10px; /* Peeks below the black bar */
-            left: 50%; /* Center anchor */
-        }
-
-        .img-stack {
-            position: relative;
-            width: 100%;
-            height: 100%;
-        }
-
-        .char-img {
-            position: absolute;
-            bottom: 0; 
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            object-position: bottom;
-            /* Shadow traces the character silhouette (Requires Transparent PNGs!) */
-            filter: drop-shadow(0 5px 12px rgba(0,0,0,0.15));
-            transition: opacity 0.4s ease-in-out;
-        }
-
-        .img-back { opacity: 0; }
-        .img-front { opacity: 1; z-index: 2; }
-
-        /* --- Precise Centered Positioning --- */
-        
-        .pos-center { 
-            transform: translateX(-50%) scale(1.2); 
-            z-index: 10; 
-            opacity: 1; 
-        }
-
-        .pos-left { 
-            transform: translateX(-115%) scale(1); 
-            z-index: 5; 
-            opacity: 0.7; 
-        }
-
-        .pos-right { 
-            transform: translateX(15%) scale(1); 
-            z-index: 5; 
-            opacity: 0.7; 
-        }
-
-        .teleporting { transition: none !important; opacity: 0 !important; }
-
-        /* --- Navigation --- */
-        .tabs { 
-            display: flex; 
-            justify-content: center; 
-            background: var(--primary); 
-            width: 100%;
-            position: relative; 
-            z-index: 20; 
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
-        }
-
-        .tab-btn { 
-            flex: 1; 
-            max-width: 200px;
-            padding: 18px; 
-            border: none; 
-            background: none; 
-            color: #777; 
-            cursor: pointer; 
-            font-weight: 800; 
-            transition: 0.3s; 
-            text-transform: uppercase; 
-            font-size: 0.75rem;
-        }
-        .tab-btn.active { color: #fff; box-shadow: inset 0 -4px 0 var(--accent); }
-
-        .char-label {
-            position: absolute;
-            top: -20px; 
-            width: 100%;
-            font-size: 0.65rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            color: #ccc;
-            pointer-events: none;
-        }
-        .pos-center .char-label { color: var(--primary); }
-
-        main { max-width: 900px; margin: 30px auto; padding: 0 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        .card { border: 1px solid #eee; padding: 15px; border-radius: 8px; text-align: center; }
-        .box { height: 140px; background: #f4f4f4; margin-bottom: 10px; border-radius: 4px; }
-    </style>
+    <title>Comic Shop</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -147,21 +15,18 @@
                 <img src="characters/kha_left.png" class="char-img img-front" id="img-front-0">
                 <img src="characters/kha_left.png" class="char-img img-back" id="img-back-0">
             </div>
-            <span class="char-label">Outfits</span>
         </div>
         <div class="char-container pos-center" onclick="switchTab(1)" id="char-1">
             <div class="img-stack">
                 <img src="characters/saf_straight.png" class="char-img img-front" id="img-front-1">
                 <img src="characters/saf_straight.png" class="char-img img-back" id="img-back-1">
             </div>
-            <span class="char-label">Accessories</span>
         </div>
         <div class="char-container pos-right" onclick="switchTab(2)" id="char-2">
             <div class="img-stack">
                 <img src="characters/dav_right.png" class="char-img img-front" id="img-front-2">
                 <img src="characters/dav_right.png" class="char-img img-back" id="img-back-2">
             </div>
-            <span class="char-label">Silver</span>
         </div>
     </div>
 
@@ -174,69 +39,6 @@
 
 <main id="storefront"></main>
 
-<script>
-    const categories = [
-        { prefix: "kha", items: ["Suit A", "Cloak B"] },
-        { prefix: "saf", items: ["Visor X", "Belt Y"] },
-        { prefix: "dav", items: ["Ring 1", "Chain 2"] }
-    ];
-
-    let currentActive = 1;
-    let isMoving = false;
-
-    function switchTab(newIdx) {
-        if (newIdx === currentActive || isMoving) return;
-        isMoving = true;
-
-        const leftIdx = (newIdx + 2) % 3;
-        const rightIdx = (newIdx + 1) % 3;
-
-        const mapping = { [newIdx]: "pos-center", [leftIdx]: "pos-left", [rightIdx]: "pos-right" };
-        const faces = { [newIdx]: "straight", [leftIdx]: "left", [rightIdx]: "right" };
-
-        categories.forEach((cat, i) => {
-            const container = document.getElementById(`char-${i}`);
-            const frontImg = document.getElementById(`img-front-${i}`);
-            const backImg = document.getElementById(`img-back-${i}`);
-            const btn = document.getElementById(`btn-${i}`);
-
-            const isTeleport = (container.classList.contains('pos-left') && mapping[i] === 'pos-right') || 
-                               (container.classList.contains('pos-right') && mapping[i] === 'pos-left');
-            
-            if (isTeleport) container.classList.add('teleporting');
-
-            backImg.src = `characters/${cat.prefix}_${faces[i]}.png`;
-            frontImg.style.opacity = '0';
-            backImg.style.opacity = '1';
-
-            container.className = "char-container " + mapping[i];
-            btn.classList.toggle('active', i === newIdx);
-
-            setTimeout(() => {
-                frontImg.src = backImg.src;
-                frontImg.style.transition = 'none';
-                frontImg.style.opacity = '1';
-                backImg.style.opacity = '0';
-                
-                setTimeout(() => {
-                    frontImg.style.transition = '';
-                    container.classList.remove('teleporting');
-                }, 50);
-            }, 800);
-        });
-
-        currentActive = newIdx;
-        renderShop(newIdx);
-        setTimeout(() => { isMoving = false; }, 850);
-    }
-
-    function renderShop(idx) {
-        const store = document.getElementById('storefront');
-        store.innerHTML = `<div class="grid">${categories[idx].items.map(item => `<div class="card"><div class="box"></div><b>${item}</b></div>`).join('')}</div>`;
-    }
-
-    window.onload = () => switchTab(1);
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
