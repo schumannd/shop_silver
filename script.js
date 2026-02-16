@@ -1,18 +1,30 @@
 let currentActive = -1;
 let isMoving = false;
-let touchStartX = 0; // Added for swipe tracking
-let touchEndX = 0;   // Added for swipe tracking
+let touchStartX = 0;
 
 function switchTab(newIdx) {
     if (newIdx === currentActive || isMoving) return;
     isMoving = true;
 
-    // Update the URL hash without reloading
     window.location.hash = (newIdx + 1);
+
+    // Fade Background Logic
+    const bg1 = document.getElementById('bg-1');
+    const bg2 = document.getElementById('bg-2');
+    const nextPath = SHOP_DATA[newIdx].bg;
+
+    if (bg1.classList.contains('active')) {
+        bg2.style.backgroundImage = `url('${nextPath}')`;
+        bg2.classList.add('active');
+        bg1.classList.remove('active');
+    } else {
+        bg1.style.backgroundImage = `url('${nextPath}')`;
+        bg1.classList.add('active');
+        bg2.classList.remove('active');
+    }
 
     const leftIdx = (newIdx + 2) % 3;
     const rightIdx = (newIdx + 1) % 3;
-
     const mapping = { [newIdx]: "pos-center", [leftIdx]: "pos-left", [rightIdx]: "pos-right" };
     const faces = { [newIdx]: "straight", [leftIdx]: "left", [rightIdx]: "right" };
 
@@ -22,8 +34,8 @@ function switchTab(newIdx) {
         const backImg = document.getElementById(`img-back-${i}`);
         const btn = document.getElementById(`btn-${i}`);
 
-        if ((container.classList.contains('pos-left') && mapping[i] === 'pos-right') || 
-            (container.classList.contains('pos-right') && mapping[i] === 'pos-left')) {
+        if (container.classList.contains('pos-left') && mapping[i] === 'pos-right' || 
+            container.classList.contains('pos-right') && mapping[i] === 'pos-left') {
             container.classList.add('teleporting');
         }
 
@@ -53,77 +65,32 @@ function switchTab(newIdx) {
 function renderShop(idx) {
     const store = document.getElementById('storefront');
     const mainCat = SHOP_DATA[idx];
-    
-    let html = `<h2>${mainCat.name} Collection</h2><div class="grid">`;
+    let html = `<h2 style="text-align:center; font-size:2rem; margin-bottom:40px;">${mainCat.name}</h2><div class="grid">`;
     html += mainCat.items.map(item => `
         <div class="card">
-            <img src="${item.img}" class="product-img" onerror="this.src='https://via.placeholder.com/200x180?text=No+Image'">
-            <b>${item.name}</b>
-            <p>${item.price}</p>
-            <a href="${item.link}" target="_blank" class="buy-btn">BUY NOW</a>
+            <img src="${item.img}" class="product-img" onerror="this.src='https://via.placeholder.com/200x180'">
+            <h3>${item.name}</h3><p>${item.price}</p>
+            <a href="${item.link}" target="_blank" class="buy-btn">VIEW PRODUCT</a>
         </div>`).join('');
-    html += `</div>`;
-
-    html += `<h2>Complete the Set</h2><div class="grid">`;
-    SHOP_DATA.forEach((cat, cIdx) => {
-        if (cIdx !== idx) {
-            html += cat.items.slice(0, 2).map(item => `
-                <div class="card">
-                    <img src="${item.img}" class="product-img" onerror="this.src='https://via.placeholder.com/200x180?text=No+Image'">
-                    <b>${item.name}</b>
-                    <p>${item.price}</p>
-                    <a href="${item.link}" target="_blank" class="buy-btn">BUY NOW</a>
-                </div>`).join('');
-        }
-    });
-    html += `</div>`;
-    store.innerHTML = html;
+    store.innerHTML = html + `</div>`;
 }
 
-// --- NEW: SWIPE LOGIC ---
-function handleGesture() {
-    const swipeThreshold = 50; // Minimum distance for a swipe
-    const diff = touchStartX - touchEndX;
-
-    if (Math.abs(diff) > swipeThreshold) {
-        if (diff > 0) {
-            // Swiped Left -> Show next character
-            let next = (currentActive + 1) % 3;
-            switchTab(next);
-        } else {
-            // Swiped Right -> Show previous character
-            let prev = (currentActive + 2) % 3;
-            switchTab(prev);
-        }
-    }
-}
-
-// Initial Load Logic
 function loadFromHash() {
     const hash = window.location.hash.replace('#', '');
     let index = parseInt(hash) - 1;
-    
-    if (isNaN(index) || index < 0 || index > 2) {
-        index = Math.floor(Math.random() * 3);
-    }
+    if (isNaN(index) || index < 0 || index > 2) index = 1;
     switchTab(index);
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    // Attach touch listeners to the banner
     const viewport = document.querySelector('.banner-viewport');
-    
-    viewport.addEventListener('touchstart', e => {
-        touchStartX = e.changedTouches[0].screenX;
-    }, {passive: true});
-
+    viewport.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
     viewport.addEventListener('touchend', e => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleGesture();
+        const diff = touchStartX - e.changedTouches[0].screenX;
+        if (Math.abs(diff) < 50) return;
+        if (diff > 0) switchTab((currentActive + 1) % 3);
+        else switchTab((currentActive + 2) % 3);
     }, {passive: true});
-
     loadFromHash();
 });
-
-// Handle back/forward button
 window.addEventListener('hashchange', loadFromHash);

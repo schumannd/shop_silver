@@ -3,106 +3,72 @@
     --accent: #ff4757;
     --duration: 0.8s;
     --curve: cubic-bezier(0.65, 0, 0.35, 1);
-    --char-height: 300px; 
 }
 
-/* 1. RESET: Kill all top gaps */
 * { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #fff; overflow-x: hidden; }
 
-html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #fff;
-    overflow-x: hidden;
-    vertical-align: top;
-}
-
-header { 
-    display: block;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    background: #fff;
-    line-height: 0; /* Removes font-descent gaps */
-}
-
+/* FIX 1: Restricted Height */
 .banner-viewport {
     position: relative;
-    width: 100%;
-    max-width: 600px;
-    height: 350px; 
-    margin: 0 auto;
-    display: flex;
-    align-items: flex-end; 
-    justify-content: center;
+    width: 100vw;
+    height: 300px; /* Fixed height instead of 100vh */
+    margin: 0;
     overflow: hidden;
+    background: #000;
 }
+
+/* FIX 2: Background Fade (No more TranslateX) */
+.bg-layer {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity var(--duration) ease-in-out;
+    z-index: 1;
+}
+.bg-layer.active { opacity: 1; }
 
 .char-container {
     position: absolute;
     transform-origin: bottom center; 
-    width: 220px;
-    height: var(--char-height);
+    width: 40vw; 
+    max-width: 400px;
+    height: 90%; 
     cursor: pointer;
-    transition: transform var(--duration) var(--curve), opacity var(--duration) var(--curve);
-    bottom: -5px; 
+    transition: transform var(--duration) var(--curve);
+    bottom: 0;
     left: 50%;
+    z-index: 5;
 }
 
 .img-stack { position: relative; width: 100%; height: 100%; }
-
 .char-img {
     position: absolute;
     bottom: 0; left: 0; width: 100%; height: 100%;
     object-fit: contain;
     object-position: bottom;
-    filter: drop-shadow(0 5px 12px rgba(0,0,0,0.15));
-    transition: opacity 0.4s ease-in-out;
 }
 
-.img-back { opacity: 0; }
+.img-back { opacity: 0; transition: opacity 0.4s; }
 .img-front { opacity: 1; z-index: 2; }
 
-/* 2. STATES */
-.pos-center { transform: translateX(-50%) scale(1.2); z-index: 10; opacity: 1; }
-.pos-left   { transform: translateX(-115%) scale(1); z-index: 5; opacity: 0.7; }
-.pos-right  { transform: translateX(15%) scale(1); z-index: 5; opacity: 0.7; }
+/* FIX 3: Solid Characters (Removed opacity: 0.5) */
+.pos-center { transform: translateX(-50%) scale(1.1); z-index: 10; }
+.pos-left   { transform: translateX(-120%) scale(0.8); z-index: 4; }
+.pos-right  { transform: translateX(20%) scale(0.8); z-index: 4; }
+
 .teleporting { transition: none !important; opacity: 0 !important; }
 
-/* 3. TABS (Sticky) */
-.tabs { 
-    display: flex; 
-    justify-content: center; 
-    background: var(--primary); 
-    width: 100%; 
-    position: sticky; 
-    top: 0;
-    z-index: 100; 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    line-height: normal; /* Restore line height for buttons */
-}
-
-.tab-btn { 
-    flex: 1; max-width: 200px; padding: 18px; border: none; background: none; 
-    color: #777; cursor: pointer; font-weight: 800; text-transform: uppercase; font-size: 0.75rem;
-}
+/* Tabs & Grid */
+.tabs { display: flex; background: var(--primary); position: sticky; top: 0; z-index: 100; }
+.tab-btn { flex: 1; padding: 20px; border: none; background: none; color: #777; cursor: pointer; font-weight: 800; }
 .tab-btn.active { color: #fff; box-shadow: inset 0 -4px 0 var(--accent); }
 
-/* 4. SHOP GRID */
-main { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-.card { border: 1px solid #eee; padding: 15px; border-radius: 12px; text-align: center; background: white; }
-
-.product-img { 
-    width: 100%; 
-    height: 180px; 
-    object-fit: cover; 
-    margin-bottom: 15px; 
-    border-radius: 8px;
-    background: #f9f9f9;
-}
-
-.buy-btn { 
-    background: var(--primary); color: white; padding: 12px; border-radius: 6px; 
-    text-decoration: none; font-weight: bold; margin-top: 10px; display: block; font-size: 0.8rem;
-}
+main { max-width: 1200px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
+.card { border: 1px solid #eee; padding: 20px; border-radius: 12px; text-align: center; }
+.product-img { width: 100%; height: 220px; object-fit: cover; }

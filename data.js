@@ -2,6 +2,7 @@ const SHOP_DATA = [
     { 
         name: "Outfits", 
         prefix: "kha", 
+        bg: "bgs/green.png", 
         items: [
             { name: "Cyber Suit", price: "$120", link: "#", img: "products/outfit1.jpg" },
             { name: "Ghost Cloak", price: "$85", link: "#", img: "products/outfit2.jpg" },
@@ -12,6 +13,7 @@ const SHOP_DATA = [
     { 
         name: "Accessories", 
         prefix: "saf", 
+        bg: "bgs/silver.png", 
         items: [
             { name: "Tech Visor", price: "$45", link: "#", img: "products/acc1.png" },
             { name: "Utility Belt", price: "$60", link: "#", img: "products/acc2.png" },
@@ -22,6 +24,7 @@ const SHOP_DATA = [
     { 
         name: "Silver", 
         prefix: "dav", 
+        bg: "bgs/red.png", 
         items: [
             { name: "Silver Chain L", price: "$150", link: "#", img: "products/silver1.jpg" },
             { name: "Heart Bracelet M", price: "$210", link: "#", img: "products/silver2.jpg" },
