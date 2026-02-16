@@ -17,3 +17,5 @@ Silver Shop
 - Silver: `#7e8584`
 
 color changing command: 
+
+`magick white.png -fuzz 10% -fill "#348feb" -opaque white blue.png`
