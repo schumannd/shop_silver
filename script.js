@@ -65,8 +65,9 @@ function switchTab(newIdx) {
 function renderShop(idx) {
     const store = document.getElementById('storefront');
     const cat = SHOP_DATA[idx];
+    const sectionColor = cat.color; // Get the specific section color
     
-    let html = `<h2 style="text-align:center; font-size:2rem; margin-bottom:40px;">${cat.name}</h2><div class="grid">`;
+    let html = `<h2 style="text-align:center; font-size:2rem; margin-bottom:40px">${cat.name}</h2><div class="grid">`;
     
     html += cat.items.map((item, itemIdx) => {
         const imgsHtml = item.imgs.map((src, i) => 
@@ -85,12 +86,13 @@ function renderShop(idx) {
             <h3>${item.name}</h3>
             <p><strong>${item.price}</strong></p>
             <p class="product-desc">${item.desc}</p>
-            <a href="${item.link}" target="_blank" class="buy-btn">BUY</a>
+            <a href="${item.link}" target="_blank" class="buy-btn" style="background-color: ${sectionColor}">BUY</a>
         </div>`;
     }).join('');
     
     store.innerHTML = html + `</div>`;
 }
+
 
 function handleGalleryClick(event, galleryEl) {
     const rect = galleryEl.getBoundingClientRect();
