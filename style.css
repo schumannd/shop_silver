@@ -43,9 +43,8 @@ html, body {
 .char-container {
     position: absolute;
     transform-origin: bottom center; 
-    width: 40vw; 
-    max-width: 400px;
     height: 90%; 
+    aspect-ratio: 3/4;
     cursor: pointer;
     transition: transform var(--duration) var(--curve);
     bottom: 0;
