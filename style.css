@@ -6,19 +6,25 @@
 }
 
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; background: #fff; overflow-x: hidden; }
+html, body { 
+    margin: 0; 
+    padding: 0; 
+    background: var(--primary); /* Uses the #121212 black you already defined */
+    color: #eee;                /* Makes the default text light so it's readable */
+    overflow-x: hidden; 
+}
 
-/* FIX 1: Restricted Height */
+/* Banner Viewport - Reduced Height */
 .banner-viewport {
     position: relative;
     width: 100vw;
-    height: 300px; /* Fixed height instead of 100vh */
+    height: 350px; 
     margin: 0;
     overflow: hidden;
     background: #000;
 }
 
-/* FIX 2: Background Fade (No more TranslateX) */
+/* Background Fade Layers */
 .bg-layer {
     position: absolute;
     top: 0; left: 0;
@@ -32,6 +38,7 @@ html, body { margin: 0; padding: 0; background: #fff; overflow-x: hidden; }
 }
 .bg-layer.active { opacity: 1; }
 
+/* Character Styling - Solid Backgrounds */
 .char-container {
     position: absolute;
     transform-origin: bottom center; 
@@ -43,6 +50,7 @@ html, body { margin: 0; padding: 0; background: #fff; overflow-x: hidden; }
     bottom: 0;
     left: 50%;
     z-index: 5;
+    opacity: 1 !important;
 }
 
 .img-stack { position: relative; width: 100%; height: 100%; }
@@ -52,23 +60,72 @@ html, body { margin: 0; padding: 0; background: #fff; overflow-x: hidden; }
     object-fit: contain;
     object-position: bottom;
 }
-
 .img-back { opacity: 0; transition: opacity 0.4s; }
 .img-front { opacity: 1; z-index: 2; }
 
-/* FIX 3: Solid Characters (Removed opacity: 0.5) */
 .pos-center { transform: translateX(-50%) scale(1.1); z-index: 10; }
 .pos-left   { transform: translateX(-120%) scale(0.8); z-index: 4; }
 .pos-right  { transform: translateX(20%) scale(0.8); z-index: 4; }
-
 .teleporting { transition: none !important; opacity: 0 !important; }
 
-/* Tabs & Grid */
+/* Navigation Tabs */
 .tabs { display: flex; background: var(--primary); position: sticky; top: 0; z-index: 100; }
-.tab-btn { flex: 1; padding: 20px; border: none; background: none; color: #777; cursor: pointer; font-weight: 800; }
+.tab-btn { flex: 1; padding: 20px; border: none; background: none; color: #777; cursor: pointer; font-weight: 800; text-transform: uppercase; }
 .tab-btn.active { color: #fff; box-shadow: inset 0 -4px 0 var(--accent); }
 
-main { max-width: 1200px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
-.card { border: 1px solid #eee; padding: 20px; border-radius: 12px; text-align: center; }
-.product-img { width: 100%; height: 220px; object-fit: cover; }
+/* Product Grid and Cards */
+main { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+.card { border: 1px solid #eee; padding: 20px; border-radius: 12px; text-align: center; display: flex; flex-direction: column; }
+
+/* Image Gallery Interaction */
+.product-gallery {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+.gallery-img { width: 100%; height: 100%; object-fit: cover; display: none; }
+.gallery-img.active { display: block; }
+
+.gallery-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.5); border: 1px solid rgba(0,0,0,0.1); }
+.dot.active { background: #fff; }
+
+.product-desc { font-size: 0.9rem; color: #666; margin: 10px 0; line-height: 1.4; flex-grow: 1; }
+
+.buy-btn {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    padding: 12px 25px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+/* Full Screen Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+    cursor: zoom-out;
+}
+.modal img { max-width: 90%; max-height: 90%; object-fit: contain; }

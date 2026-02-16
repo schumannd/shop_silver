@@ -8,7 +8,7 @@ function switchTab(newIdx) {
 
     window.location.hash = (newIdx + 1);
 
-    // Fade Background Logic
+    // Cross-fade Backgrounds
     const bg1 = document.getElementById('bg-1');
     const bg2 = document.getElementById('bg-2');
     const nextPath = SHOP_DATA[newIdx].bg;
@@ -64,15 +64,65 @@ function switchTab(newIdx) {
 
 function renderShop(idx) {
     const store = document.getElementById('storefront');
-    const mainCat = SHOP_DATA[idx];
-    let html = `<h2 style="text-align:center; font-size:2rem; margin-bottom:40px;">${mainCat.name}</h2><div class="grid">`;
-    html += mainCat.items.map(item => `
+    const cat = SHOP_DATA[idx];
+    
+    let html = `<h2 style="text-align:center; font-size:2rem; margin-bottom:40px;">${cat.name}</h2><div class="grid">`;
+    
+    html += cat.items.map((item, itemIdx) => {
+        const imgsHtml = item.imgs.map((src, i) => 
+            `<img src="${src}" class="gallery-img ${i === 0 ? 'active' : ''}" data-index="${i}">`
+        ).join('');
+
+        const dotsHtml = item.imgs.length > 1 ? 
+            `<div class="gallery-dots">${item.imgs.map((_, i) => `<div class="dot ${i === 0 ? 'active' : ''}"></div>`).join('')}</div>` : '';
+
+        return `
         <div class="card">
-            <img src="${item.img}" class="product-img" onerror="this.src='https://via.placeholder.com/200x180'">
-            <h3>${item.name}</h3><p>${item.price}</p>
-            <a href="${item.link}" target="_blank" class="buy-btn">VIEW PRODUCT</a>
-        </div>`).join('');
+            <div class="product-gallery" onclick="handleGalleryClick(event, this)">
+                ${imgsHtml}
+                ${dotsHtml}
+            </div>
+            <h3>${item.name}</h3>
+            <p><strong>${item.price}</strong></p>
+            <p class="product-desc">${item.desc}</p>
+            <a href="${item.link}" target="_blank" class="buy-btn">BUY</a>
+        </div>`;
+    }).join('');
+    
     store.innerHTML = html + `</div>`;
+}
+
+function handleGalleryClick(event, galleryEl) {
+    const rect = galleryEl.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const width = rect.width;
+
+    const images = galleryEl.querySelectorAll('.gallery-img');
+    const dots = galleryEl.querySelectorAll('.dot');
+    let activeIdx = Array.from(images).findIndex(img => img.classList.contains('active'));
+
+    // Center Click (33% to 66%): Full Screen
+    if (x > width * 0.33 && x < width * 0.66) {
+        const modal = document.getElementById('image-modal');
+        const modalImg = document.getElementById('modal-img');
+        modalImg.src = images[activeIdx].src;
+        modal.style.display = 'flex';
+        return;
+    }
+
+    // Edge Clicks: Scroll
+    if (images.length <= 1) return;
+    images[activeIdx].classList.remove('active');
+    if (dots.length) dots[activeIdx].classList.remove('active');
+
+    if (x <= width * 0.33) {
+        activeIdx = (activeIdx - 1 + images.length) % images.length;
+    } else {
+        activeIdx = (activeIdx + 1) % images.length;
+    }
+
+    images[activeIdx].classList.add('active');
+    if (dots.length) dots[activeIdx].classList.add('active');
 }
 
 function loadFromHash() {
@@ -93,4 +143,5 @@ window.addEventListener('DOMContentLoaded', () => {
     }, {passive: true});
     loadFromHash();
 });
+
 window.addEventListener('hashchange', loadFromHash);
