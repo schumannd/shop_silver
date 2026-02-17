@@ -37,7 +37,7 @@ html, body {
     transition: opacity var(--duration) ease-in-out;
     z-index: 1;
 }
-.bg-layer.active { opacity: 1; }
+.bg-layer.active { opacity: 0.25; }
 
 /* Character Styling - Solid Backgrounds */
 .char-container {
